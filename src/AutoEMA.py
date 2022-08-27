@@ -11,7 +11,7 @@ def load_example():
     """ This function imports an exemplary FRF
     :return: FRF, corresponding frequency vector
     """
-    data = pickle.load(open(os.path.join(os.getcwd(), 'data', 'simulated_3dof.p'), 'rb'))[0]
+    data = pickle.load(open(os.path.join('data', 'simulated_3dof.p'), 'rb'))[0]
     frf = data['FRFs']
     freq_axis = data['f_axis']
     return frf, freq_axis
