@@ -11,7 +11,7 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="AutoEMA",
-    version="0.0.11",
+    version="0.0.13",
     description="A fully automated EMA (Experimental Modal Analysis) using Bayesian optimization",
     long_description="DL: A fully automated EMA (Experimental Modal Analysis) using Bayesian optimization",
     url="https://github.com/leo-beck/AutoEMA",

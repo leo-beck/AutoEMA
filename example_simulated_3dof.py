@@ -1,4 +1,4 @@
-import AutoEMA as ae
+from AutoEMA import AutoEMA as ae
 
 # Load data
 frf, f = ae.load_example()
