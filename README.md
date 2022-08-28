@@ -1,2 +1,3 @@
 # AutoEMA (Automated Experimental Modal Analysis)
-Automated Modal Analysis
+
+Project currently under developement
