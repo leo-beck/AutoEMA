@@ -6,7 +6,7 @@ Description coming soon
 Using pip is recommended to install this package. See [this](https://pip.pypa.io/en/stable/installation/) for more information.
 
 ```
-pip install AutoEMA
+pip install autoema
 ```
 
 ## Quick Start 
