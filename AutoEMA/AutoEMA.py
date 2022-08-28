@@ -547,7 +547,7 @@ def load_example():
     """ This function imports an exemplary FRF
     :return: FRF, corresponding frequency vector
     """
-    data = pickle.load(urlopen("https://github.com/leo-beck/AutoEMA/raw/main/src/data/simulated_3dof.p"))[0]
+    data = pickle.load(urlopen("https://github.com/leo-beck/AutoEMA/raw/main/data/simulated_3dof.p"))[0]
     frf = data['FRFs']
     freq_axis = data['f_axis']
     return frf, freq_axis
