@@ -11,17 +11,17 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="AutoEMA",
-    version="0.0.4",
+    version="0.0.11",
     description="A fully automated EMA (Experimental Modal Analysis) using Bayesian optimization",
+    long_description="DL: A fully automated EMA (Experimental Modal Analysis) using Bayesian optimization",
     url="https://github.com/leo-beck/AutoEMA",
     author="Leopold Beck",
     author_email="l.beck@tum.de",
     keywords="EMA, modal, analysis, automated, mechanics, bayes, bayesian, optimization",
-    package_dir={"": "src"},  # Optional
-    packages=find_packages(where="src"),
+    packages=["AutoEMA"],
     python_requires=">=3.7, <4",
     install_requires=['matplotlib>=3.5.3',
-                      'numpy>=1.23.2',
+                      'numpy>=1.0',
                       'scikit-learn>=1.1.2',
                       'scipy==1.7.2',
                       'bayesian-optimization>=1.2.0',
