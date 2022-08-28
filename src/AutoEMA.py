@@ -7,16 +7,6 @@ import os
 import pickle
 
 
-def load_example():
-    """ This function imports an exemplary FRF
-    :return: FRF, corresponding frequency vector
-    """
-    data = pickle.load(open(os.path.join('data', 'simulated_3dof.p'), 'rb'))[0]
-    frf = data['FRFs']
-    freq_axis = data['f_axis']
-    return frf, freq_axis
-
-
 class BaseModel:
     def __init__(self, frf: np.ndarray, f_axis: np.ndarray, lowest_f: float = None,
                  highest_f: float = None, params: dict = None):
@@ -54,10 +44,11 @@ class BaseModel:
             self.lowest_f_arg = np.argmin(abs(self.lowest_f - self.f_axis))
         if highest_f is None:
             self.highest_f = f_axis[-1]
-            self.highest_f_arg = len(self.f_axis) + 1
         else:
             self.highest_f = float(highest_f)
-            self.highest_f_arg = np.argmin(abs(self.highest_f - self.f_axis))
+        self.highest_f_arg = np.argmin(abs(self.highest_f - self.f_axis))
+        if self.highest_f_arg+1 == len(self.f_axis):
+            self.highest_f_arg = len(self.f_axis)
         # Set f_axis and frf according to defined frequency range
         self.f_axis = self.f_axis[:self.highest_f_arg]
         self.frf = self.frf[:, :self.highest_f_arg]
@@ -228,6 +219,7 @@ class BaseModel:
         # Export if path is defined
         if path_to_save is not None:
             plt.savefig(path_to_save, bbox_inches='tight')
+        plt.show()
         return fig
 
     def plot_damping_ratios(self, path_to_save: str = None):
@@ -249,7 +241,7 @@ class BaseModel:
         plt.plot(self.valid_poles_fod[0], self.valid_poles_fod[2], 'rx', label="Valid pole", markersize=x_size)
         plt.plot(self.nf, self.dr, 'bx', label="Selected pole", markersize=x_size)
         # Add legend
-        plt.legend(loc="upper right", bbox_to_anchor=(1.2, 0.9), prop={'size': font_size}, fancybox=True, framealpha=1,
+        plt.legend(loc="upper right", bbox_to_anchor=(1.45, 0.9), prop={'size': font_size}, fancybox=True, framealpha=1,
                    labelspacing=0.3)
         # Make plot smaller in horizontal direction to have enough space for the legend
         plt.subplots_adjust(right=0.65)
@@ -261,7 +253,6 @@ class BaseModel:
     def __repr__(self):
         info = ""
         info += "Model order: {}\n".format(len(self.nf))
-        info += "FRF shape: {}\n".format(np.shape(self.frf))
         info += "FRAC: {:.1f}%\n".format(self.get_frac()*100)
         nfs = list(map('{:.1f}'.format, self.nf))
         info += "Natural frequencies: {}\n".format(nfs)
@@ -443,6 +434,7 @@ class BaseModel:
         self.H = frf_
         self.ms = self.A
 
+
     # Helper functions
     @staticmethod
     def _get_cf_from_f_and_ceta(f: list, ceta: list) -> np.ndarray:
@@ -488,6 +480,9 @@ class OptModel(BaseModel):
         self.reg = float(reg)
         if order is not None:
             self.order = float(order)
+        else:
+            self.order = None
+        self.show_progress = bool(show_progress)
         # Define Boundaries
         p_bounds = {
             'n_max': (60, 120),
@@ -518,8 +513,8 @@ class OptModel(BaseModel):
             self.set_params(params)
             # Calculate rebuilt FRF
             self.run()
-            # Get Difference of model order or absolute model order
-            if order is not None:
+            # Get difference of model order or absolute model order
+            if self.order is not None:
                 diff_order = (self.order - len(self.nf)) ** 2
             else:
                 diff_order = len(self.nf)
@@ -528,7 +523,7 @@ class OptModel(BaseModel):
             return score
 
         # Initialize Bayesian optimizer
-        if show_progress:
+        if self.show_progress:
             verbose = 2
         else:
             verbose = 0
@@ -546,3 +541,51 @@ class OptModel(BaseModel):
         self.set_params(self.optimizer.max['params'])
         # Run again with the best params
         self.run()
+
+
+def load_example():
+    """ This function imports an exemplary FRF
+    :return: FRF, corresponding frequency vector
+    """
+    data = pickle.load(open(os.path.join(os.getcwd(), 'data', 'simulated_3dof.p'), 'rb'))[0]
+    frf = data['FRFs']
+    freq_axis = data['f_axis']
+    return frf, freq_axis
+
+
+def save_model(model, path_and_name: str):
+    """ This function saves the model
+    :return: -
+    """
+    if path_and_name[-2] != '.p':
+        path_and_name += '.p'
+    # Create dict containing all necessary data
+    vals = {'model_type': 'BaseModel',
+            'frf': model.frf,
+            'f': model.f_axis,
+            'low': model.lowest_f,
+            'high': model.highest_f}
+    if str(type(model)).__contains__('Opt'):
+        vals['model_type'] = 'OptModel'
+        vals['order'] = model.order
+        vals['show_progress'] = model.show_progress
+        vals['reg'] = model.reg
+    pickle.dump([vals, model.params], open(path_and_name, 'wb'))
+
+
+def load_model(path_and_name: str):
+    """ This function loads a model
+    :return: BaseModel or OptModel
+    """
+    if path_and_name[-2] != '.p':
+        path_and_name += '.p'
+    vals, params = pickle.load(open(path_and_name, 'rb'))
+    if vals['model_type'] == 'BaseModel':
+        model = BaseModel(frf=vals['frf'], f_axis=vals['f'], lowest_f=vals['low'],
+                          highest_f=vals['high'], params=params)
+    else:
+        model = OptModel(frf=vals['frf'], f_axis=vals['f'], lowest_f=vals['low'], highest_f=vals['high'],
+                         order=vals['order'], show_progress=vals['show_progress'], reg=vals['reg'])
+        model.set_params(params)
+    model.run()
+    return model

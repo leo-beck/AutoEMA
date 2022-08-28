@@ -1,5 +1,5 @@
 [project]
-name = "AutoEMA"
+name = "auto_ema"
 version = "0.0.1"
 authors = [
   { name="Leopold Beck", email="leo.beck@gmx.net" },
