@@ -1,16 +1,3 @@
-[project]
-name = "AutoEMA"
-version = "0.0.2"
-authors = [
-  { name="Leopold Beck", email="leo.beck@gmx.net" },
-]
-description = "A Bayesian optimization for Experimental Modal Analysis"
-readme = "README.md"
-license = { file="LICENSE" }
-
-[project.urls]
-"Homepage" = "https://github.com/leo-beck/AutoEMA"
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

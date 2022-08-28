@@ -1,6 +1,0 @@
-matplotlib>=3.5.3
-numpy>=1.23.2
-scikit-learn>=1.1.2
-scipy==1.7.2
-bayesian-optimization>=1.2.0
-sdypy-EMA>=0.24
