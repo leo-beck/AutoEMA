@@ -1,4 +1,4 @@
-# AutoEMA (Automated Experimental Modal Analysis)
+# Automated Experimental Modal Analysis using Bayesian Optimization (AutoEMA)
 
 Description coming soon
 
