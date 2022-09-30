@@ -26,15 +26,14 @@ class BaseModel:
         """        
         self.frf = np.array(frf)
         assert len(np.shape(self.frf)) == 2, \
-            "Expected frf to be 2-dimensional but it has the shape: " + str(np.shape(self.frf))
+            f"Expected frf to be 2-dimensional but it has the shape: {str(np.shape(self.frf))}"
         assert np.count_nonzero(np.isnan(self.frf) + np.isinf(self.frf)) == 0, \
             "frf must not contain NaNs or Infs!"
         self.f_axis = np.array(f_axis)
         assert (len(np.shape(self.f_axis)) == 1), \
-            "Expected f_axis to be 1-dimensional but it has the shape: " + str(np.shape(self.f_axis))
+            f"Expected f_axis to be 1-dimensional but it has the shape: {str(np.shape(self.f_axis))}"
         assert len(self.f_axis) == np.shape(self.frf)[1], \
-            "Expected f_axis[:] and frf[0,:] to have same length, but it is " + str(len(self.f_axis)) + " and " + \
-            str(np.shape(self.frf)[1])
+            f"Expected f_axis[:] and frf[0,:] to have same len, but it's {len(self.f_axis)} and {np.shape(self.frf)[1]}"
         # Set range of frequency
         if lowest_f is None:
             self.lowest_f = f_axis[0]
@@ -54,13 +53,11 @@ class BaseModel:
         self.frf = self.frf[:, :self.highest_f_arg]
         # Set initial params
         self.params = {"n_max": 80, "err_fn": 0.01, "err_ceta": 0.05, "min_ceta": 0,
-                       "max_ceta": 0.2, "dist": 2, "min_poles": 0.3, "max_norm": 0.5}  # 0.2, 0.5
-        # Overwrite manually defined params
+                       "max_ceta": 0.2, "dist": 2, "min_poles": 0.3, "max_norm": 0.5}
         self.set_params(params)
-        # Initialize other variables
+        # Initialize variables
         self.sampling_time = 0
         self.all_poles = []
-        # Reset all params
         self.H = np.zeros_like(self.frf)  # rebuilt FRF
         self.nf = []  # natural frequency
         self.dr = []  # damping ratio
@@ -78,7 +75,7 @@ class BaseModel:
         :return: -
         """
         if params is not None:
-            for key in params.keys():
+            for key in params:
                 if key in self.params:
                     # Every param except n_max is float.
                     if key == 'n_max':
@@ -86,8 +83,7 @@ class BaseModel:
                     else:
                         self.params[key] = float(params[key])
                 else:
-                    raise ValueError("PARAMETER '{}' DOES NOT EXIST. Possible Parameter: {}"
-                                     .format(key, list(self.params.keys())))
+                    raise ValueError(f"PARAMETER '{key}' DOESN'T EXIST. Possible Parameter: {list(self.params.keys())}")
 
     def run(self) -> int:
         """ This function runs the automated modal analysis for the defined params in self.params
@@ -135,9 +131,9 @@ class BaseModel:
         frf2 = self.frf[:, self.lowest_f_arg:]
         # Cut to relevant frequency range
         all_scores = []
-        for i in range(len(frf1)):
-            num = np.vdot(frf1[i], frf2[i])**2
-            den = np.vdot(frf1[i], frf1[i]) * np.vdot(frf2[i], frf2[i])
+        for f1, f2 in zip(frf1, frf2):
+            num = np.vdot(f1, f2)**2
+            den = np.vdot(f1, f1) * np.vdot(f2, f2)
             all_scores.append(num/den)
         frac = np.mean(np.abs(all_scores))
         return float(frac)
@@ -194,8 +190,8 @@ class BaseModel:
             ax1.vlines(self.nf, 0, self.params["n_max"], colors='k', zorder=0, linewidth=0.5,
                        label='Natural frequency')
         ax1.set_zorder(2)
-
-        ax2 = ax1.twinx()  # instantiate a second axes that shares the x-axis
+        # instantiate a second axes that shares the x-axis
+        ax2 = ax1.twinx()
         ax2.set_zorder(2)
         if x_lim is not None:
             ax2.set_xlim(x_lim)
@@ -260,12 +256,6 @@ class BaseModel:
         info += "Damping ratios: {}".format(drs)
         return info
 
-    def print_info(self):
-        """ Prints information about model order, natural frequency, frac value and damping ratios
-        :return: -
-        """
-        print(self)
-
     # Functions for internal use are marked with the underscore (_) prefix
     def _preprocess_poles(self):
         """ Transform complex poles to frequency and damping ratio, check frequency range
@@ -273,8 +263,8 @@ class BaseModel:
         """
         self.poles_f = []
         self.poles_ceta = []
-        for i_order in range(len(self.all_poles)):
-            f, ceta = self._get_f_and_ceta_from_cf(self.all_poles[i_order])
+        for i_poles in self.all_poles:
+            f, ceta = self._get_f_and_ceta_from_cf(i_poles)
             # Check which poles are in between the selected frequency range and if ceta is positive
             valid_indices = np.array(self.lowest_f <= f) * np.array(ceta > 0)
             self.poles_f.append(list(f[valid_indices]))
@@ -289,9 +279,7 @@ class BaseModel:
         val_poles_f = []
         val_poles_o = []
         val_poles_dr = []
-        for i_order in range(1, len(self.poles_f)):
-            f = self.poles_f[i_order]
-            ceta = self.poles_ceta[i_order]
+        for i_order, (f, ceta) in enumerate(zip(self.poles_f, self.poles_ceta)):
             # Iterate through every pole of current order
             for i_pole in range(len(f)):
                 freq_valid = np.abs((f[i_pole]-f_old)/f_old) < self.params["err_fn"]
@@ -434,7 +422,6 @@ class BaseModel:
         self.H = frf_
         self.ms = self.A
 
-
     # Helper functions
     @staticmethod
     def _get_cf_from_f_and_ceta(f: list, ceta: list) -> np.ndarray:
@@ -507,10 +494,7 @@ class OptModel(BaseModel):
             :return: Score. Type: float. Higher=Better.
             """
             # Build param dict from inputs and set them
-            params = {}
-            for key, value in kwargs.items():
-                params[key] = value
-            self.set_params(params)
+            self.set_params(kwargs)
             # Calculate rebuilt FRF
             self.run()
             # Get difference of model order or absolute model order

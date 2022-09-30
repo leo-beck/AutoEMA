@@ -3,7 +3,7 @@ https://github.com/leo-beck/AutoEMA
 """
 
 # Always prefer setuptools over distutils
-from setuptools import setup, find_packages
+from setuptools import setup
 import pathlib
 
 here = pathlib.Path(__file__).parent.resolve()
@@ -12,8 +12,8 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 setup(
     name="AutoEMA",
     version="0.0.13",
-    description="A fully automated EMA (Experimental Modal Analysis) using Bayesian optimization",
-    long_description="DL: A fully automated EMA (Experimental Modal Analysis) using Bayesian optimization",
+    description="Automated Experimental Modal Analysis using Bayesian Optimization",
+    long_description_content_type='text/markdown',
     url="https://github.com/leo-beck/AutoEMA",
     author="Leopold Beck",
     author_email="l.beck@tum.de",
@@ -25,5 +25,60 @@ setup(
                       'scikit-learn>=1.1.2',
                       'scipy==1.7.2',
                       'bayesian-optimization>=1.2.0',
-                      'sdypy-EMA>=0.24']
+                      'sdypy-EMA>=0.24'],
+    long_description="""# Automated Experimental Modal Analysis using Bayesian Optimization (AutoEMA)
+    
+    Description coming soon
+    
+    ## Installation
+    Using pip is recommended to install this package. See [this](https://pip.pypa.io/en/stable/installation/) for more information.
+    
+    ```
+    pip install autoema
+    ```
+    
+    ## Quick Start 
+    Import package:
+    
+    ``` 
+    from AutoEMA import AutoEMA as ae 
+    ```
+    
+    
+    Get exemplary data set: 
+    
+    ``` 
+    frf, f = ae.load_example() 
+    ```
+    
+    Initialize model:
+    
+    ``` 
+    model = ae.OptModel(frf=frf, f_axis=f) 
+    ```
+    
+    Do the automated modal analysis:
+    
+    ``` 
+    model.optimize(n_init=2, n_iter=2)  # Do more iterations on real data 
+    ```
+    
+    Plot the stability diagram:
+    
+    ``` 
+    model.plot_stability_diagram() 
+    ```
+    
+    Print information about the resulting model:
+    
+    ``` 
+    print(model) 
+    ```
+    
+    Get the results of the modal analysis:
+    
+    ``` 
+    reconstructed_frf, freq_axis, nat_freqs, damp_ratios, mode_shapes = model.get_results() 
+    FRAC = model.get_frac() 
+    ``` """,
 )

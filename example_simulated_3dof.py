@@ -5,13 +5,14 @@ frf, f = ae.load_example()
 
 # Init model
 model = ae.OptModel(frf=frf, f_axis=f)
+
 # Optimize model
 model.optimize(n_init=2, n_iter=2)  # Do more iterations on real data
 
 # Plot stability diagram
 model.plot_stability_diagram()
 
-# Print information
+# Print results
 print(model)
 
 # Get results
@@ -22,10 +23,3 @@ FRAC = model.get_frac()
 p = model.params
 bmodel = ae.BaseModel(frf=frf, f_axis=f, params=p)
 bmodel.run()
-
-# Optimizing can be continued without loosing information
-model.optimize(n_init=0, n_iter=1)
-
-# Store model
-ae.save_model(model, "my_model")
-m = ae.load_model("my_model")
