@@ -1,17 +1,13 @@
 import numpy as np
-import AutoEMA as ae
+from AutoEMA import AutoEMA as ae
 
-def test_example_data_loading():
+def example_data_loading():
     # Load data
     frf, f = ae.load_example()
-    print(np.shape(frf))
-    print(np.shape(f))
-    assert np.shape(frf) == 5, "Error loading data (frf)"
-    assert np.shape(f) == 1, "Error loading data (f)"
     return frf, f
 
 
-def test_example_data_optmodel(frf, f):
+def example_data_optmodel(frf, f):
     # Init model
     model = ae.OptModel(frf=frf, f_axis=f)
     # Optimize model
@@ -19,10 +15,17 @@ def test_example_data_optmodel(frf, f):
     return model
 
 
-def test_example_data_results(model):
-    assert model.get_frac() > 0.9, "Error in resulting model"
+def example_data_results(model):
+    return model.get_frac()
 
 
-frf, f = test_example_data_loading()
-model = test_example_data_optmodel(frf, f)
-test_example_data_results(model)
+def test_loading():
+    frf, f = example_data_loading()
+    assert np.shape(frf) == (25, 15001)
+    assert len(f) == 15001
+
+def test_optmodel():
+    frf, f = example_data_loading()
+    model = example_data_optmodel(frf, f)
+    frac = example_data_results(model)
+    assert model.get_frac() > 0.9
