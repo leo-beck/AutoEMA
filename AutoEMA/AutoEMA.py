@@ -165,7 +165,7 @@ class BaseModel:
             raise ValueError("exc_type can either be 'a', 'v' or 's'")
         x_size = 18
         label_spacing = 0.3
-        fig_size = (14, 6)
+        fig_size = (10, 5)
         color_rebuilt = 'orange'
         # Create plot
         fig, ax1 = plt.subplots(figsize=fig_size, sharey=True)
